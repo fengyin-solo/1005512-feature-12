@@ -3,7 +3,7 @@
     <header class="page-head">
       <div>
         <h2>洁净区环境监测管理</h2>
-        <p class="page-desc">维护环境监测记录，围绕监测点位、洁净级别、悬浮粒子数、沉降菌数做登记、筛选与状态流转。</p>
+        <p class="page-desc">维护环境监测记录，围绕监测点位、洁净级别、悬浮粒子数、沉降菌数做登记、筛选与状态流转；工艺用水判定结论自动反映到本清单（以「【水点】」标识）。</p>
       </div>
       <div class="page-actions">
         <button class="btn primary" type="button" @click="openCreate">登记环境监测记录</button>
@@ -36,14 +36,20 @@
     <table class="data-table">
       <thead>
         <tr>
+          <th>编号</th>
           <th v-for="column in columns" :key="column">{{ column }}</th>
+          <th>水系统类别</th>
+          <th>检验结论</th>
           <th>当前状态</th>
           <th>可执行动作</th>
         </tr>
       </thead>
       <tbody>
         <tr v-for="row in rows" :key="String(row.id)">
+          <td>#{{ row.id }}</td>
           <td v-for="column in columns" :key="column">{{ row[column] ?? '—' }}</td>
+          <td>{{ row['水系统类别'] ?? '—' }}</td>
+          <td>{{ row['检验结论'] ?? '—' }}</td>
           <td>{{ row.status }}</td>
           <td class="row-actions">
             <button
@@ -58,7 +64,7 @@
           </td>
         </tr>
         <tr v-if="!rows.length">
-          <td :colspan="columns.length + 2" class="empty-state">暂无洁净区环境监测数据，可先登记环境监测记录</td>
+          <td :colspan="columns.length + 4" class="empty-state">暂无洁净区环境监测数据，可先登记环境监测记录</td>
         </tr>
       </tbody>
     </table>
