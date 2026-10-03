@@ -35,3 +35,28 @@ body { margin: 0; background: #f6f8fb; color: #1f2937; }
 .error-text { color: #b42318; }
 .status-legend { display: flex; flex-wrap: wrap; gap: 12px; margin: 0 0 10px; font-size: 12px; color: var(--muted); }
 .legend-item { background: #eef2f7; border-radius: 999px; padding: 2px 10px; }
+
+/* 工艺用水：分线排期说明 / 弹窗 / 外发徽标 */
+.line-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; list-style: none; margin: 0 0 12px; padding: 10px 12px; background: #fff; border: 1px solid var(--border); border-radius: 8px; font-size: 12px; color: var(--muted); }
+.line-legend strong { color: #1f2937; }
+.row-abnormal { background: #fdf4f4; }
+.state-badge { display: inline-block; padding: 1px 9px; border-radius: 999px; font-size: 11.5px; white-space: nowrap; }
+.state-badge.good { background: #e7f6ec; color: #1a7f37; }
+.state-badge.muted { background: #eef2f7; color: var(--muted); }
+.success-text { color: #1a7f37; }
+.hint { font-size: 11.5px; color: var(--muted); }
+.modal-mask { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 24px; }
+.modal { background: #fff; border-radius: 10px; width: 620px; max-width: 100%; max-height: 88vh; overflow: auto; padding: 20px 24px; box-shadow: 0 18px 48px rgba(15, 23, 42, 0.25); }
+.modal-mask.wide .modal { width: 880px; }
+.modal h3 { margin: 0 0 8px; font-size: 16px; }
+.modal-tip { font-size: 12.5px; color: var(--muted); margin: 0 0 14px; line-height: 1.7; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.field { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; }
+.field.wide { grid-column: 1 / -1; }
+.field span { color: var(--muted); }
+.field input, .field select, .filter-item input, .filter-item select { border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 13px; }
+.field.readonly strong { font-weight: 600; }
+.field.readonly strong { font-size: 13px; color: #0f172a; }
+.modal-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 16px; }
+.report-table .point-chip { display: inline-block; background: #eef2f7; border-radius: 4px; padding: 1px 7px; margin: 0 4px 4px 0; font-size: 11.5px; }
+.report-table .empty-row { background: #f8fafc; }

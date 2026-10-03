@@ -17,6 +17,8 @@ export type ModuleMeta = {
   statuses: string[]
   actions: string[]
   actionTargets: Record<string, string>
+  // 动作只允许从这些状态发起：没登记的模块沿用原口径（按动作目标态直接流转）。
+  allowedFrom?: Record<string, string[]>
   metrics: string[]
 }
 

@@ -3,6 +3,79 @@ import type { EntryRow } from './types'
 
 // 本地持久化：数据放在 localStorage 里，刷新、关掉再打开都还在。
 const STORAGE_KEY = 'pharma-cleanroom:entries'
+// 水系统分册外发台账：同一条取样记录重复导出只算一次，按记录编号去重。
+const WATER_LEDGER_KEY = 'pharma-cleanroom:water-export-ledger'
+
+export type WaterExportLedgerEntry = {
+  recordId: number
+  category: string
+  point: string
+  sampleDate: string
+  firstExportAt: string
+  exportCount: number
+}
+
+type WaterExportLedger = Record<string, WaterExportLedgerEntry>
+
+function readLedger(): WaterExportLedger {
+  if (typeof window === 'undefined' || !window.localStorage) {
+    return {}
+  }
+  const raw = window.localStorage.getItem(WATER_LEDGER_KEY)
+  if (!raw) {
+    return {}
+  }
+  try {
+    return JSON.parse(raw) as WaterExportLedger
+  } catch {
+    return {}
+  }
+}
+
+let ledgerCache: WaterExportLedger | null = null
+
+function saveLedger(): void {
+  if (typeof window !== 'undefined' && window.localStorage && ledgerCache) {
+    window.localStorage.setItem(WATER_LEDGER_KEY, JSON.stringify(ledgerCache))
+  }
+}
+
+// 批量登记外发：已外发过的记录只累加次数、首次外发时间不动，返回去重后的台账视图。
+export function markWaterExports(
+  records: { id: number; category: string; point: string; sampleDate: string }[],
+  exportedAt: string,
+): WaterExportLedgerEntry[] {
+  if (ledgerCache === null) {
+    ledgerCache = readLedger()
+  }
+  for (const record of records) {
+    const key = String(record.id)
+    const existing = ledgerCache[key]
+    if (existing) {
+      existing.exportCount += 1
+    } else {
+      ledgerCache[key] = {
+        recordId: record.id,
+        category: record.category,
+        point: record.point,
+        sampleDate: record.sampleDate,
+        firstExportAt: exportedAt,
+        exportCount: 1,
+      }
+    }
+  }
+  saveLedger()
+  return listWaterLedger()
+}
+
+export function listWaterLedger(): WaterExportLedgerEntry[] {
+  if (ledgerCache === null) {
+    ledgerCache = readLedger()
+  }
+  return Object.values(ledgerCache).sort(
+    (a, b) => a.firstExportAt.localeCompare(b.firstExportAt) || a.recordId - b.recordId,
+  )
+}
 
 function clone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value)) as T

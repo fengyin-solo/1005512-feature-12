@@ -1,5 +1,9 @@
 import { MODULE_BY_KEY } from '@/data/modules'
 import { allRows, listRows, resetRows, saveRows } from '@/data/local-store'
+import {
+  syncCleanroomConclusion,
+  validateBeforeQualify,
+} from '@/api/water-service'
 import type { ActionResult, EntryRow, ModuleMeta, OverviewResult, PageResult } from '@/data/types'
 
 // 会写进数据的「往回走」动作：命中就把这条记录标成异常态，看板上能一眼看出来。
@@ -43,16 +47,38 @@ export function runAction(key: string, id: number, action: string): ActionResult
   if (current === target) {
     return { ok: false, message: `${meta.entity}已经是「${target}」，不用重复操作` }
   }
+  // 登记了前置态白名单的模块：状态只能顺着流转，越级（含回跳）一律挡回。
+  const allowedFrom = meta.allowedFrom?.[action]
+  if (allowedFrom && !allowedFrom.includes(current)) {
+    return {
+      ok: false,
+      message: `当前状态「${current}」不能执行「${action}」（须先处于「${allowedFrom.join(
+        '或',
+      )}」），越级流转已挡回`,
+    }
+  }
+  // 工艺用水判定合格前在服务侧逐项卡限值：缺项/越界（微生物越界打回重填）挡回。
+  if (key === 'watermonitor' && action === '判定合格') {
+    const guard = validateBeforeQualify(rows[index])
+    if (!guard.ok) {
+      return guard
+    }
+  }
   const lastStatus = meta.statuses[meta.statuses.length - 1]
+  const negative = NEGATIVE_ACTIONS.some((verb) => action.startsWith(verb))
   const updated: EntryRow = {
     ...rows[index],
     status: target,
     pending: target !== lastStatus,
-    abnormal: NEGATIVE_ACTIONS.some((verb) => action.startsWith(verb)),
+    abnormal: negative ? true : target === '不合格',
   }
   const next = [...rows]
   next[index] = updated
   saveRows(key, next)
+  // 水系统结论反映到洁净区环境监测清单（待取样/检测中不联动）。
+  if (key === 'watermonitor' && (target === '已合格' || target === '不合格')) {
+    syncCleanroomConclusion(updated)
+  }
   return { ok: true, message: `${meta.entity}已${action}，当前状态「${target}」` }
 }
 
